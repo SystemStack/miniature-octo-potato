@@ -1,20 +1,46 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Chat Module
+The [chat module](#footnotes) provides an easy to use interface for [Azure Communication Services](https://azure.microsoft.com/en-us/services/communication-services/) that provides text, voice, SMS, and robotic communication.
+  
+# Features
+![Features Image](FeatureRequirements.png)
+- [x] User creation and authorization by username or issues a GUID for tracking anonymous clients
+- [x] Multi-Channel
+- [ ] [🚧](#footnotes) Plugin Mode
+- [ ] [🚧](#footnotes) Message Receipts
+- [ ] [🚧](#footnotes) Offline
+- [ ] Consistent look and feel
+- [ ] Filter previous conversations
+- [ ] AI Options
+- [ ] Business Support
+- [ ] IT Support / TicketService
+- [ ] Alerts
+- [ ] Video Chat
+- [ ] Sending attachments
+- [ ] SMS Messaging
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+1. Clone the repository in Visual Studio.
+2. Create an appsettings.json file in the same directory as appsettings.template.json, copying it's template.
+3. Create a Communication Service in the Azure Portal.
+4. Navigate to the communication service you created and click "Keys", then fill out your appsettings.json file
+5. Run all of the integration tests before implementing in your production code!
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+# Swagger API
+TODO
 
 # Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+Please contribute! This can be in any way from reading through code and reporting on possible abstractions to writing integration or unit tests to updating packages. If you're looking for a place to start consider adding documentation or reaching out to <levi.broadnax@weyerhaeuser.com>.
+1. Clone the main branch to your development computer.
+2. Create a new branch from main with the format: (_feature/feature-name_) or (_bugfix/issue-name_).
+3. Make your changes!
+4. Create a pull request from your branch into main, I will perform a code review and will leave comments! Things I'll look for are
+   1. Formatting: Where are the spaces and line breaks? Are they using tabs or spaces? How are the curly braces laid out?
+   2. Style: Are the variables/parameters declared as final? Are method variables defined close to the code where they’re used or at the start of the method?
+   3. Naming: Do the field/constant/variable/param/class names conform to standards? Are the names overly short?
+   4. Test coverage: Is there a test for this code? Do previous tests still pass?
+   5. Cyclomatic Complexity: Is the complexity appropriate for the problem being solved?
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## | Footnotes
+[1] [Cutting Edge Reusable Modules Proposal](https://cuttingedge.weyerhaeuser.com/servlet/hype/IMT?documentId=93cc0f6b0a78863f1665c9bed07b5f95&userAction=Browse&templateName=)
+
+[2] 🚧 Work In Progress
