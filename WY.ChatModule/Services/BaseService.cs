@@ -1,6 +1,6 @@
-﻿using System;
-using ChatModule.Models;
+﻿using ChatModule.Models;
 using ChatModule.Stores;
+using System;
 
 namespace ChatModule.Services
 {

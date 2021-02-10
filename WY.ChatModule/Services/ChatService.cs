@@ -1,16 +1,16 @@
+using Azure.Communication.Chat;
+using ChatModule.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Azure.Communication.Chat;
-using ChatModule.Models;
 
 [assembly: InternalsVisibleTo("ChatModule.Test")]
 namespace ChatModule.Services
 {
     public sealed class ChatService
     {
-        ChatThreadClient Client { get; }
+        private ChatThreadClient Client { get; }
         public ChatService(ChatThreadClient chatThreadClient)
         {
             Client = chatThreadClient;
@@ -101,6 +101,6 @@ namespace ChatModule.Services
             //var x = await Client.UpdateThreadAsync();
             //return x;
         }
-       
+
     }
 }

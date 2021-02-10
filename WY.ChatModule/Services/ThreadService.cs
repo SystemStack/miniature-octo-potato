@@ -1,10 +1,10 @@
+using Azure.Communication.Chat;
+using Azure.Communication.Identity;
+using ChatModule.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Azure.Communication.Chat;
-using Azure.Communication.Identity;
-using ChatModule.Models;
 
 [assembly: InternalsVisibleTo("ChatModule.Test")]
 namespace ChatModule.Services
@@ -54,7 +54,8 @@ namespace ChatModule.Services
             if (Store.Exists(idOrTopic))
             {
                 return await Client.GetChatThreadAsync(idOrTopic);
-            } else if(Store.GetByUserKey(idOrTopic, out string id))
+            }
+            else if (Store.GetByUserKey(idOrTopic, out string id))
             {
                 return await Client.GetChatThreadAsync(id);
             }

@@ -2,7 +2,7 @@
 
 namespace ChatModule
 {
-    class Utils
+    internal class Utils
     {
         public static T IsNotNull<T>(T arg, string argName)
             where T : class

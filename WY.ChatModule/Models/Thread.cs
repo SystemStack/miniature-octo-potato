@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Azure.Communication.Chat;
+﻿using Azure.Communication.Chat;
+using System.Collections.Generic;
 
 namespace ChatModule.Models
 {

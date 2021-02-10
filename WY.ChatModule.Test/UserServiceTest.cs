@@ -1,9 +1,9 @@
-﻿using System;
-using ChatModule.Models;
+﻿using ChatModule.Models;
 using ChatModule.Services;
 using ChatModule.Stores;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using Xunit;
 
 namespace ChatModule.Test
@@ -11,13 +11,12 @@ namespace ChatModule.Test
     // Integration tests
     public class UserServiceTest
     {
-        
+
         private readonly UserService userService;
         public UserServiceTest(IServiceProvider serviceProvider)
         {
             Host.CreateDefaultBuilder()
-                .ConfigureServices((hostContext, services) =>
-                {
+                .ConfigureServices((hostContext, services) => {
                     services.AddSingleton(new Store<User>())
                             .AddSingleton(new Store<Thread>());
                 });

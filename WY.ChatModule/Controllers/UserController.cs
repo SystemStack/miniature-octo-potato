@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using ChatModule.Models;
+﻿using ChatModule.Models;
 using ChatModule.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace ChatModule.Controllers
 {
@@ -10,8 +10,8 @@ namespace ChatModule.Controllers
     [Route("[controller]")]
     public sealed class UserController : BaseController<UserService>
     {
-        public UserController(IServiceProvider serviceProvider) 
-            : base(serviceProvider) {}
+        public UserController(IServiceProvider serviceProvider)
+            : base(serviceProvider) { }
 
         [HttpPost]
         [ApiVersion("1.0")]

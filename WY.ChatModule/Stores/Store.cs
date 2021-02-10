@@ -1,7 +1,7 @@
-﻿using System;
+﻿using ChatModule.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using ChatModule.Models;
 
 namespace ChatModule.Stores
 {
@@ -13,7 +13,8 @@ namespace ChatModule.Stores
         //internalKey: data model
         private readonly ConcurrentDictionary<string, T> Data;
 
-        public Store() {
+        public Store()
+        {
             Keys = new ConcurrentDictionary<string, string>(Environment.ProcessorCount * 2, 100);
             Data = new ConcurrentDictionary<string, T>(Environment.ProcessorCount * 2, 100);
         }
@@ -25,7 +26,7 @@ namespace ChatModule.Stores
         public T Get(string key)
         {
             Utils.IsNotNull(key, nameof(key));
-            if(!Data.TryGetValue(key, out T Result))
+            if (!Data.TryGetValue(key, out T Result))
             {
                 throw new KeyNotFoundException(string.Format("No {0} with key: {1} found", typeof(T), key));
             }
@@ -40,7 +41,7 @@ namespace ChatModule.Stores
         {
             Utils.IsNotNull(key, nameof(key));
             Utils.IsNotNullT(element, nameof(element));
-            if(Data.TryAdd(key, element))
+            if (Data.TryAdd(key, element))
             {
                 return Keys.TryAdd(element.UserKey, element.InternalKey);
             }
@@ -63,14 +64,14 @@ namespace ChatModule.Stores
         private T Mapper(string key)
         {
 #pragma warning restore IDE0051 // Remove unused private members
-            throw new NotImplementedException();
+            throw new NotImplementedException(/*TODO: Implement*/);
         }
 
 #pragma warning disable IDE0051 // Remove unused private members
         private T NearestNeighbor(string key)
 #pragma warning restore IDE0051 // Remove unused private members
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(/*TODO: Implement*/);
         }
     }
 }

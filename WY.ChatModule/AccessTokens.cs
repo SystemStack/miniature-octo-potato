@@ -1,9 +1,9 @@
-using System;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace ChatModule
 {
-    static class AccessTokens
+    static internal class AccessTokens
     {
         private static IConfiguration Config { get; }
         public static string ChatKey { get; private set; }
@@ -23,7 +23,7 @@ namespace ChatModule
             ConnectionString = Config.GetConnectionString("PrimaryChat").Trim();
             UriEndpoint = new Uri(Endpoint);
         }
-        
+
         // TODO: Implement
         public static void CatchPrimaryTokenFailure()
         {

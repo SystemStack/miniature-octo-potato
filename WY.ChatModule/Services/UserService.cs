@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Azure.Communication.Administration;
+using ChatModule.Models;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Azure.Communication.Administration;
-using ChatModule.Models;
 
 [assembly: InternalsVisibleTo("ChatModule.Test")]
 namespace ChatModule.Services
