@@ -22,6 +22,8 @@ namespace ChatModule
             }
             return arg;
         }
+        public static bool IsFailure(Azure.Response response)
+            => !IsSuccess(response);
 
         public static bool IsSuccess(Azure.Response response)
         {

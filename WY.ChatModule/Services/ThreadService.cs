@@ -31,10 +31,10 @@ namespace ChatModule.Services
             => await CreateChatThreadAsync(topic, identities.ConvertAll(new Converter<string, ChatThreadMember>(IdentityToChatThreadMember)));
         public async Task<ChatService> CreateChatThreadAsync(string topic, IEnumerable<ChatThreadMember> members)
         {
-            ChatThreadClient chatThreadClient = await Client.CreateChatThreadAsync(topic, members);
-            ChatService chatService = new ChatService(chatThreadClient);
-            Thread thread = new Thread(topic, chatThreadClient.Id, members);
-            Store.Add(thread.Id, thread);
+            var chatThreadClient = await Client.CreateChatThreadAsync(topic, members);
+            var chatService = new ChatService(chatThreadClient);
+            var clientThread = Client.GetChatThread(chatThreadClient.Id);
+            Store.Add(topic, new Thread(clientThread));
             return chatService;
         }
         #endregion Create Chat Thread
@@ -48,16 +48,16 @@ namespace ChatModule.Services
         #endregion Delete Chat Thread
 
         #region GetChatThread
-        public Azure.Response<ChatThread> GetChatThread(string idOrTopic) => GetChatThreadAsync(idOrTopic).Result;
-        public async Task<Azure.Response<ChatThread>> GetChatThreadAsync(string idOrTopic)
+        public Thread GetChatThread(string idOrTopic) => GetChatThreadAsync(idOrTopic).Result;
+        public async Task<Thread> GetChatThreadAsync(string idOrTopic)
         {
             if (Store.Exists(idOrTopic))
             {
-                return await Client.GetChatThreadAsync(idOrTopic);
+                return new Thread(await Client.GetChatThreadAsync(idOrTopic));
             }
-            else if (Store.GetByUserKey(idOrTopic, out string id))
+            else if (Store.GetByUserKey(idOrTopic, out var id))
             {
-                return await Client.GetChatThreadAsync(id);
+                return new Thread(await Client.GetChatThreadAsync(id));
             }
             throw new Exception(string.Format("Thread with id or topic: {0} does not exist", idOrTopic));
         }
@@ -66,7 +66,7 @@ namespace ChatModule.Services
         #region Get Chat Thread Client
         public ChatService GetCommunicationThreadClient(string idOrTopic)
         {
-            ChatThreadClient chatThreadClient = Client.GetChatThreadClient(idOrTopic);
+            var chatThreadClient = Client.GetChatThreadClient(idOrTopic);
             return new ChatService(chatThreadClient);
         }
         #endregion Get Chat Thread Client
@@ -76,6 +76,7 @@ namespace ChatModule.Services
             return Client.GetChatThreadsInfoAsync(startTime);
         }
 
+        // TODO Access Store to see if we can use the idtoken from there
         private static ChatThreadMember IdentityToChatThreadMember(string idToken)
             => new ChatThreadMember(new Azure.Communication.CommunicationUser(idToken));
     }

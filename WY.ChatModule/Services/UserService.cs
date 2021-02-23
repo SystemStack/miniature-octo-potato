@@ -12,7 +12,6 @@ namespace ChatModule.Services
     {
         private readonly List<CommunicationTokenScope> Scope =
             new List<CommunicationTokenScope>() { CommunicationTokenScope.Chat };
-
         public UserService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
@@ -70,7 +69,7 @@ namespace ChatModule.Services
         {
             var user = Store.Get(userId);
             var response = await Client.RevokeTokensAsync(user.CommunicationUser);
-            if (Utils.IsSuccess(response))
+            if (Utils.IsFailure(response))
             {
                 throw new Exception("Access tokens not revoked");
             }

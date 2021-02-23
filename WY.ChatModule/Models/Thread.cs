@@ -1,20 +1,19 @@
 ﻿using Azure.Communication.Chat;
-using System.Collections.Generic;
 
 namespace ChatModule.Models
 {
     public class Thread : IModel
     {
-        public string Topic { get; set; }
-        public string Id { get; set; }
-        public readonly IEnumerable<ChatThreadMember> Members;
         public string InternalKey => Id;
         public string UserKey => Topic;
-        public Thread(string topic, string threadId, IEnumerable<ChatThreadMember> members)
+        public string Id { get; private set; }
+        public string Topic { get; private set; }
+        public ChatThread ChatThread { get; private set; }
+        public Thread(ChatThread thread)
         {
-            Topic = topic;
-            Id = threadId;
-            Members = members;
+            ChatThread = thread;
+            Id = thread.Id;
+            Topic = thread.Topic;
         }
     }
 }

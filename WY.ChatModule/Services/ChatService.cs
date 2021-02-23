@@ -15,13 +15,14 @@ namespace ChatModule.Services
         {
             Client = chatThreadClient;
         }
-        // TODO: Add by stringID, list<userID, etc
+        public Azure.Response AddMembers(List<User> chatMembers)
+            => AddMembersAsync(chatMembers.ConvertAll(new Converter<User, ChatThreadMember>(UserToChatThreadMember))).Result;
+        public async Task<Azure.Response> AddMembersAsync(List<User> chatMembers)
+            => await AddMembersAsync(chatMembers.ConvertAll(new Converter<User, ChatThreadMember>(UserToChatThreadMember)));
         public Azure.Response AddMembers(IEnumerable<ChatThreadMember> chatMembers) => AddMembersAsync(chatMembers).Result;
         public async Task<Azure.Response> AddMembersAsync(IEnumerable<ChatThreadMember> chatMembers)
         {
-            Azure.Response response = await Client.AddMembersAsync(chatMembers);
-            // TODO: implement
-            return response;
+            return await Client.AddMembersAsync(chatMembers);
         }
 
         public bool DeleteMessage(string param1) => DeleteMessageAsync(param1).Result;
@@ -101,6 +102,9 @@ namespace ChatModule.Services
             //var x = await Client.UpdateThreadAsync();
             //return x;
         }
+
+        private static ChatThreadMember UserToChatThreadMember(User user)
+            => new ChatThreadMember(user.CommunicationUser);
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ChatModule.Models;
 using ChatModule.Services;
 using ChatModule.Stores;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +10,7 @@ namespace ChatModule
 {
     public sealed class Startup
     {
-        public Startup()
+        public void Configure(IApplicationBuilder app)
         {
             Utils.IsNotNull(AccessTokens.ConnectionString, "Connection String");
             Utils.IsNotNull(AccessTokens.ChatKey, "Chat Key");
