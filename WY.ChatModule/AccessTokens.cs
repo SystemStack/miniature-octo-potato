@@ -33,16 +33,17 @@ namespace ChatModule
             }
             else if (keyVaultTokens.Exists())
             {
-                var options = new SecretClientOptions() {
-                    Retry =
+                SecretClient client = new SecretClient(new Uri(keyVaultTokens["Endpoint"].Trim()),
+                    new DefaultAzureCredential(),
+                    new SecretClientOptions() {
+                        Retry =
                     {
                         Delay= TimeSpan.FromSeconds(2),
                         MaxDelay = TimeSpan.FromSeconds(16),
                         MaxRetries = 5,
                         Mode = Azure.Core.RetryMode.Exponential
                     }
-                };
-                var client = new SecretClient(new Uri(keyVaultTokens["Endpoint"].Trim()), new DefaultAzureCredential(), options);
+                });
                 Endpoint = client.GetSecret("Endpoint").Value.Value;
                 ChatKey = client.GetSecret("Key").Value.Value;
                 SecondaryChatKey = client.GetSecret("SecondaryKey").Value.Value;

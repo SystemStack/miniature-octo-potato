@@ -1,4 +1,5 @@
-﻿using ChatModule.Models;
+﻿using ChatModule.Controllers;
+using ChatModule.Models;
 using ChatModule.Services;
 using ChatModule.Stores;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,8 @@ namespace ChatModule
 {
     public sealed class Startup
     {
+        // TODO: Finish configuring
+        // TODO: JSON Formatters
         public void Configure(IApplicationBuilder app)
         {
             Utils.IsNotNull(AccessTokens.ConnectionString, "Connection String");
@@ -22,13 +25,17 @@ namespace ChatModule
                     services
                         .AddSingleton(new Store<User>())
                         .AddSingleton(new Store<Thread>());
-
-                    // Microsoft clients instantiated within Services
+                    
+                    // Azure Communication clients instantiated within Services
                     services.AddScoped(typeof(UserService));
-                    services.AddApiVersioning(x => {
-                        x.DefaultApiVersion = new ApiVersion(1, 0);
-                        x.AssumeDefaultVersionWhenUnspecified = true;
-                        x.ReportApiVersions = true;
+                    services.AddApiVersioning(apiOptions => {
+                        apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
+                        apiOptions.AssumeDefaultVersionWhenUnspecified = true;
+                        apiOptions.ReportApiVersions = true;
+                    });
+
+                    services.AddControllers(controllerOptions => {
+                        controllerOptions.AllowEmptyInputInBodyModelBinding = true;
                     });
                 });
         }

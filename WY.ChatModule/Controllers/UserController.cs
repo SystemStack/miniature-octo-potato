@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace ChatModule.Controllers
 {
     [ApiController]
+    [Produces("application/json")]
     [Route("[controller]")]
     public sealed class UserController : BaseController<UserService>
     {
@@ -15,7 +16,7 @@ namespace ChatModule.Controllers
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<ActionResult<User>> Create(string userId)
+        public async Task<ActionResult<User>> Create(string? userId)
         {
             userId ??= Guid.NewGuid().ToString();
             return await Service.CreateUserAsync(userId);
@@ -25,6 +26,7 @@ namespace ChatModule.Controllers
         [ApiVersion("1.0")]
         public async Task<ActionResult<User>> RefreshToken(string userId)
         {
+            Utils.IsNotNull(userId, nameof(userId));
             return await Service.RefreshTokenAsync(userId);
         }
 
@@ -32,6 +34,7 @@ namespace ChatModule.Controllers
         [ApiVersion("1.0")]
         public async Task<ActionResult<Azure.Response>> RevokeAccessToken(string userId)
         {
+            Utils.IsNotNull(userId, nameof(userId));
             return await Service.RevokeAccessTokenAsync(userId);
         }
 
@@ -39,6 +42,7 @@ namespace ChatModule.Controllers
         [ApiVersion("1.0")]
         public async Task<ActionResult<Azure.Response>> Delete(string userId)
         {
+            Utils.IsNotNull(userId, nameof(userId));
             return await Service.DeleteUserAsync(userId);
         }
     }

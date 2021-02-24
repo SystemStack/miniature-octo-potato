@@ -57,7 +57,7 @@ namespace ChatModule.Services
         public User RefreshToken(string userId) => RefreshTokenAsync(userId).Result;
         public async Task<User> RefreshTokenAsync(string userId)
         {
-            User user = Store.Get(userId);
+            var user = Store.Get(userId);
             var azureResponse = await Client.IssueTokenAsync(user.CommunicationUser, Scope);
             User updatedUser = new User(userId, azureResponse);
             Store.Update(userId, user, updatedUser);

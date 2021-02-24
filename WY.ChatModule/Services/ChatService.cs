@@ -1,3 +1,4 @@
+using Azure.Communication;
 using Azure.Communication.Chat;
 using ChatModule.Models;
 using System;
@@ -13,8 +14,11 @@ namespace ChatModule.Services
         private ChatThreadClient Client { get; }
         public ChatService(ChatThreadClient chatThreadClient)
         {
+            Utils.IsNotNull(chatThreadClient, nameof(chatThreadClient));
             Client = chatThreadClient;
         }
+
+        #region Members
         public Azure.Response AddMembers(List<User> chatMembers)
             => AddMembersAsync(chatMembers.ConvertAll(new Converter<User, ChatThreadMember>(UserToChatThreadMember))).Result;
         public async Task<Azure.Response> AddMembersAsync(List<User> chatMembers)
@@ -22,89 +26,92 @@ namespace ChatModule.Services
         public Azure.Response AddMembers(IEnumerable<ChatThreadMember> chatMembers) => AddMembersAsync(chatMembers).Result;
         public async Task<Azure.Response> AddMembersAsync(IEnumerable<ChatThreadMember> chatMembers)
         {
+            Utils.IsNotNullOrEmpty(chatMembers, nameof(chatMembers));
             return await Client.AddMembersAsync(chatMembers);
         }
+        
+        public IEnumerable<ChatThreadMember> GetMembers() => GetMembersAsync().Result;
+        public async Task<IEnumerable<ChatThreadMember>> GetMembersAsync()
+        {
+            return await Utils.AsyncToList(Client.GetMembersAsync());
+        }
 
-        public bool DeleteMessage(string param1) => DeleteMessageAsync(param1).Result;
-        public async Task<bool> DeleteMessageAsync(string param1)
+        public Azure.Response RemoveMember(User user)
+           => RemoveMemberAsync(user.CommunicationUser).Result;
+        public async Task<Azure.Response> RemoveMemberAsync(User user)
+            => await RemoveMemberAsync(user.CommunicationUser);
+        public Azure.Response RemoveMember(CommunicationUser user)
+            => RemoveMemberAsync(user).Result;
+        public async Task<Azure.Response> RemoveMemberAsync(CommunicationUser user)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.DeleteMessageAsync();
-            //return x;
+            Utils.IsNotNull(user, nameof(user));
+            return await Client.RemoveMemberAsync(user);
         }
-        public IEnumerable<User> GetMembers(string param1) => GetMembersAsync(param1).Result;
-        public async Task<IEnumerable<User>> GetMembersAsync(string param1)
+        #endregion Members
+
+        #region Messages
+        public SendChatMessageResult SendMessage(string content, string? displayName = null) => SendMessageAsync(content, displayName).Result;
+        public async Task<SendChatMessageResult> SendMessageAsync(string content, string? displayname = null)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.GetMembersAsync();
-            //return x;
+            Utils.IsNotNull(content, nameof(content));
+            return await Client.SendMessageAsync(content, ChatMessagePriority.Normal, displayname);
         }
-        public object GetMessage(string param1) => GetMessageAsync(param1).Result;
-        public async Task<object> GetMessageAsync(string param1)
+
+        public Azure.Response SendReadReceipt(string messageId) => SendReadReceiptAsync(messageId).Result;
+        public async Task<Azure.Response> SendReadReceiptAsync(string messageId)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.GetMessageAsync();
-            //return x;
+            Utils.IsNotNull(messageId, nameof(messageId));
+            return await Client.SendReadReceiptAsync(messageId);
         }
-        public IEnumerable<object> GetMessages(string param1) => GetMessagesAsync(param1).Result;
-        public async Task<IEnumerable<object>> GetMessagesAsync(string param1)
+
+        public Azure.Response SendTypingNotification() => SendTypingNotificationAsync().Result;
+        public async Task<Azure.Response> SendTypingNotificationAsync()
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.GetMessagesAsync();
-            //return x;
+            return await Client.SendTypingNotificationAsync();
         }
-        public IEnumerable<object> GetReadReceipts(string param1) => GetReadReceiptsAsync(param1).Result;
-        public async Task<IEnumerable<object>> GetReadReceiptsAsync(string param1)
+
+        public IEnumerable<ChatMessage> GetMessages() => GetMessagesAsync().Result;
+        public async Task<IEnumerable<ChatMessage>> GetMessagesAsync()
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.GetReadReceiptsAsync();
-            //return x;
+            return await Utils.AsyncToList(Client.GetMessagesAsync());
         }
-        public bool RemoveMember(string param1) => RemoveMemberAsync(param1).Result;
-        public async Task<bool> RemoveMemberAsync(string param1)
+        public IEnumerable<ReadReceipt> GetReadReceipts() => GetReadReceiptsAsync().Result;
+        public async Task<IEnumerable<ReadReceipt>> GetReadReceiptsAsync()
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.RemoveMemberAsync();
-            //return x;
+            return await Utils.AsyncToList(Client.GetReadReceiptsAsync());
         }
-        public bool SendMessage(string param1) => SendMessageAsync(param1).Result;
-        public async Task<bool> SendMessageAsync(string param1)
+
+        public Azure.Response UpdateMessage(string messageId, string content) => UpdateMessageAsync(messageId, content).Result;
+        public async Task<Azure.Response> UpdateMessageAsync(string messageId, string content)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.SendMessageAsync();
-            //return x;
+            Utils.IsNotNull(messageId, nameof(messageId));
+            Utils.IsNotNull(content, nameof(content));
+            return await Client.UpdateMessageAsync(messageId, content);
         }
-        public object SendReadReceipt(string param1) => SendReadReceiptAsync(param1).Result;
-        public async Task<object> SendReadReceiptAsync(string param1)
+
+        public Azure.Response DeleteMessage(string messageId) => DeleteMessageAsync(messageId).Result;
+        public async Task<Azure.Response> DeleteMessageAsync(string messageId)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.SendReadReceiptAsync();
-            //return x;
+            Utils.IsNotNull(messageId, nameof(messageId));
+            return await Client.DeleteMessageAsync(messageId);
         }
-        public object SendTypingNotification(string param1) => SendTypingNotificationAsync(param1).Result;
-        public async Task<object> SendTypingNotificationAsync(string param1)
+        public Azure.Response<ChatMessage> GetMessage(string id) => GetMessageAsync(id).Result;
+        public async Task<Azure.Response<ChatMessage>> GetMessageAsync(string id)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.SendTypingNotificationAsync();
-            //return x;
+            Utils.IsNotNull(id, nameof(id));
+            return await Client.GetMessageAsync(id);
         }
-        public bool UpdateMessage(string param1) => UpdateMessageAsync(param1).Result;
-        public async Task<bool> UpdateMessageAsync(string param1)
+        #endregion Messages
+
+
+        public Azure.Response UpdateThread(string topic) => UpdateThreadAsync(topic).Result;
+        public async Task<Azure.Response> UpdateThreadAsync(string topic)
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.UpdateMessageAsync();
-            //return x;
-        }
-        public bool UpdateThread(string param1) => UpdateThreadAsync(param1).Result;
-        public async Task<bool> UpdateThreadAsync(string param1)
-        {
-            throw new NotImplementedException(/*TODO: Implement*/);
-            //var x = await Client.UpdateThreadAsync();
-            //return x;
+            Utils.IsNotNull(topic, nameof(topic));
+            return await Client.UpdateThreadAsync(topic);
         }
 
         private static ChatThreadMember UserToChatThreadMember(User user)
             => new ChatThreadMember(user.CommunicationUser);
-
     }
 }

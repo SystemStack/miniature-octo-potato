@@ -1,13 +1,16 @@
-﻿using ChatModule.Models;
+﻿using Azure.Communication.Chat;
+using ChatModule.Models;
 using ChatModule.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+// TODO refactor controllers to make chatthreadclient/chatclient exposure more logical 
 namespace ChatModule.Controllers
 {
     [ApiController]
+    [Produces("application/json")]
     [Route("[controller]")]
     public sealed class ChatController : BaseController<ChatService>
     {
@@ -16,92 +19,130 @@ namespace ChatModule.Controllers
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<bool> AddMembers(IEnumerable<User> chatMembers)
+        public async Task<Azure.Response> AddMembers(IEnumerable<User> chatMembers)
         {
+            
             var result = await Service.AddMembersAsync(chatMembers as List<User>);
             if (Utils.IsFailure(result))
             {
                 throw new Exception("Failed to add members to thread");
             }
-            return true;
+            return result;
         }
 
         [HttpDelete]
         [ApiVersion("1.0")]
-        public async Task<bool> DeleteMessage(string param1)
+        public async Task<Azure.Response> DeleteMessage(string messageId)
         {
-            return await Service.DeleteMessageAsync(param1);
+            var result = await Service.DeleteMessageAsync(messageId);
+            if (Utils.IsFailure(result))
+            {
+                throw new Exception("Failed to add members to thread");
+            }
+            return result;
         }
-
 
         [HttpGet]
         [ApiVersion("1.0")]
         public async Task<IEnumerable<User>> GetMembers(string param1)
         {
-            return await Service.GetMembersAsync(param1);
+            throw new NotImplementedException(/*TODO: MAP chatthreadmembers to users*/);
+            var result = await Service.GetMembersAsync();
+            return result as IEnumerable<User>;
         }
 
         [HttpGet]
         [ApiVersion("1.0")]
-        public async Task<object> GetMessage(string param1)
+        public async Task<ChatMessage> GetMessage(string messageId)
         {
-            return await Service.GetMessageAsync(param1);
+            var result = await Service.GetMessageAsync(messageId);
+            if (Utils.IsFailure(result.GetRawResponse()))
+            {
+                throw new Exception("Could not find message with that Id");
+            }
+            return result.Value;
         }
 
         [HttpGet]
         [ApiVersion("1.0")]
-        public async Task<IEnumerable<object>> GetMessages(string param1)
+        public async Task<IEnumerable<ChatMessage>> GetMessages()
         {
-            return await Service.GetMessagesAsync(param1);
+            var result = await Service.GetMessagesAsync();
+            return result;
         }
 
         [HttpGet]
         [ApiVersion("1.0")]
-        public async Task<IEnumerable<object>> GetReadReceipts(string param1)
+        public async Task<IEnumerable<ReadReceipt>> GetReadReceipts()
         {
-            return await Service.GetReadReceiptsAsync(param1);
+            return await Service.GetReadReceiptsAsync();
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<bool> RemoveMember(string param1)
+        public async Task<Azure.Response> RemoveMember(User user)
         {
-            return await Service.RemoveMemberAsync(param1);
+            var result = await Service.RemoveMemberAsync(user);
+            if (Utils.IsFailure(result))
+            {
+                throw new Exception("User was not removed");
+            }
+            return result;
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<bool> SendMessage(string param1)
+        public async Task<SendChatMessageResult> SendMessage(string content, [FromBody] User? user)
         {
-            return await Service.SendMessageAsync(param1);
+            return await Service.SendMessageAsync(content, user?.UserId);
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<object> SendReadReceipt(string param1)
+        public async Task<Azure.Response> SendReadReceipt(string messageId)
         {
-            return await Service.SendReadReceiptAsync(param1);
+            var result = await Service.SendReadReceiptAsync(messageId);
+            if (Utils.IsFailure(result))
+            {
+                throw new Exception("Could not send read receipt");
+            }
+            return result;
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<object> SendTypingNotification(string param1)
+        public async Task<Azure.Response> SendTypingNotification()
         {
-            return await Service.SendTypingNotificationAsync(param1);
+            var result = await Service.SendTypingNotificationAsync();
+            if (Utils.IsFailure(result))
+            {
+                throw new Exception("Could not send typing notification");
+            }
+            return result;
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<bool> UpdateMessage(string param1)
+        public async Task<Azure.Response> UpdateMessage(string messageId, string content)
         {
-            return await Service.UpdateMessageAsync(param1);
+            var result = await Service.UpdateMessageAsync(messageId, content);
+            if (Utils.IsFailure(result))
+            {
+                throw new Exception("Could not update message");
+            }
+            return result;
         }
 
         [HttpPost]
         [ApiVersion("1.0")]
-        public async Task<bool> UpdateThread(string param1)
+        public async Task<Azure.Response> UpdateThread(string topic)
         {
-            return await Service.UpdateThreadAsync(param1);
+            var response = await Service.UpdateThreadAsync(topic);
+            if (Utils.IsFailure(response))
+            {
+                throw new Exception("Could not update thread");
+            }
+            return response;
         }
     }
 }

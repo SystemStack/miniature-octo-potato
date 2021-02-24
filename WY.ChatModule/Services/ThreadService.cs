@@ -14,6 +14,7 @@ namespace ChatModule.Services
         public ThreadService(IServiceProvider serviceProvider, User user)
             : base(serviceProvider)
         {
+            Utils.IsNotNull(user, nameof(user));
             CommunicationUserCredential communicationUserCredential = new CommunicationUserCredential(user.Token);
             Client = new ChatClient(AccessTokens.UriEndpoint, communicationUserCredential);
         }
@@ -31,8 +32,10 @@ namespace ChatModule.Services
             => await CreateChatThreadAsync(topic, identities.ConvertAll(new Converter<string, ChatThreadMember>(IdentityToChatThreadMember)));
         public async Task<ChatService> CreateChatThreadAsync(string topic, IEnumerable<ChatThreadMember> members)
         {
+            Utils.IsNotNull(topic, nameof(topic));
+            Utils.IsNotNullOrEmpty(members, nameof(members));
             var chatThreadClient = await Client.CreateChatThreadAsync(topic, members);
-            var chatService = new ChatService(chatThreadClient);
+            ChatService chatService = new ChatService(chatThreadClient);
             var clientThread = Client.GetChatThread(chatThreadClient.Id);
             Store.Add(topic, new Thread(clientThread));
             return chatService;
@@ -43,6 +46,7 @@ namespace ChatModule.Services
         public Azure.Response DeleteChatThread(string idOrTopic) => DeleteChatThreadAsync(idOrTopic).Result;
         public async Task<Azure.Response> DeleteChatThreadAsync(string idOrTopic)
         {
+            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
             return await Client.DeleteChatThreadAsync(idOrTopic);
         }
         #endregion Delete Chat Thread
@@ -51,6 +55,7 @@ namespace ChatModule.Services
         public Thread GetChatThread(string idOrTopic) => GetChatThreadAsync(idOrTopic).Result;
         public async Task<Thread> GetChatThreadAsync(string idOrTopic)
         {
+            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
             if (Store.Exists(idOrTopic))
             {
                 return new Thread(await Client.GetChatThreadAsync(idOrTopic));
@@ -66,6 +71,7 @@ namespace ChatModule.Services
         #region Get Chat Thread Client
         public ChatService GetCommunicationThreadClient(string idOrTopic)
         {
+            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
             var chatThreadClient = Client.GetChatThreadClient(idOrTopic);
             return new ChatService(chatThreadClient);
         }
@@ -77,7 +83,7 @@ namespace ChatModule.Services
         }
 
         // TODO Access Store to see if we can use the idtoken from there
-        private static ChatThreadMember IdentityToChatThreadMember(string idToken)
+        private ChatThreadMember IdentityToChatThreadMember(string idToken)
             => new ChatThreadMember(new Azure.Communication.CommunicationUser(idToken));
     }
 }

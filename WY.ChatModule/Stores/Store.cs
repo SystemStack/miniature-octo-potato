@@ -26,7 +26,7 @@ namespace ChatModule.Stores
         public T Get(string key)
         {
             Utils.IsNotNull(key, nameof(key));
-            if (!Data.TryGetValue(key, out T Result))
+            if (!Data.TryGetValue(key, out var Result))
             {
                 throw new KeyNotFoundException(string.Format("No {0} with key: {1} found", typeof(T), key));
             }
@@ -40,7 +40,7 @@ namespace ChatModule.Stores
         public bool Add(string key, T element)
         {
             Utils.IsNotNull(key, nameof(key));
-            Utils.IsNotNullT(element, nameof(element));
+            Utils.IsNotNullModel(element, nameof(element));
             if (Data.TryAdd(key, element))
             {
                 return Keys.TryAdd(element.UserKey, element.InternalKey);
@@ -50,8 +50,8 @@ namespace ChatModule.Stores
         public bool Update(string key, T newValue, T oldValue)
         {
             Utils.IsNotNull(key, nameof(key));
-            Utils.IsNotNullT(newValue, nameof(newValue));
-            Utils.IsNotNullT(oldValue, nameof(oldValue));
+            Utils.IsNotNullModel(newValue, nameof(newValue));
+            Utils.IsNotNullModel(oldValue, nameof(oldValue));
             return Data.TryUpdate(key, newValue, oldValue);
         }
         public bool Remove(string key, out T RemovedElement)
@@ -61,17 +61,10 @@ namespace ChatModule.Stores
         }
 
 #pragma warning disable IDE0051 // Remove unused private members
-        private T Mapper(string key)
-        {
-#pragma warning restore IDE0051 // Remove unused private members
-            throw new NotImplementedException(/*TODO: Implement*/);
-        }
-
-#pragma warning disable IDE0051 // Remove unused private members
         private T NearestNeighbor(string key)
 #pragma warning restore IDE0051 // Remove unused private members
         {
-            throw new NotImplementedException(/*TODO: Implement*/);
+            throw new NotImplementedException(/*TODO: Add nearest neighbor search*/);
         }
     }
 }
