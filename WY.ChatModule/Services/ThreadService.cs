@@ -20,25 +20,28 @@ namespace ChatModule.Services
         }
 
         #region Create Chat Thread
-        public ChatService CreateChatThread(string topic, string identityToken)
+        public Thread CreateChatThread(string topic, string identityToken)
             => CreateChatThread(topic, new List<string>() { identityToken });
-        public ChatService CreateChatThread(string topic, List<string> identities)
+        public Thread CreateChatThread(string topic, List<string> identities)
             => CreateChatThread(topic, identities.ConvertAll(new Converter<string, ChatThreadMember>(IdentityToChatThreadMember)));
-        public ChatService CreateChatThread(string topic, IEnumerable<ChatThreadMember> identities)
+        public Thread CreateChatThread(string topic, IEnumerable<ChatThreadMember> identities)
             => CreateChatThreadAsync(topic, identities).Result;
-        public async Task<ChatService> CreateChatThreadAsync(string topic, string identityToken)
+        public async Task<Thread> CreateChatThreadAsync(string topic, string identityToken)
             => await CreateChatThreadAsync(topic, new List<string>() { identityToken });
-        public async Task<ChatService> CreateChatThreadAsync(string topic, List<string> identities)
+        public async Task<Thread> CreateChatThreadAsync(string topic, List<string> identities)
             => await CreateChatThreadAsync(topic, identities.ConvertAll(new Converter<string, ChatThreadMember>(IdentityToChatThreadMember)));
-        public async Task<ChatService> CreateChatThreadAsync(string topic, IEnumerable<ChatThreadMember> members)
+        public async Task<Thread> CreateChatThreadAsync(string topic, IEnumerable<ChatThreadMember> members)
         {
             Utils.IsNotNull(topic, nameof(topic));
             Utils.IsNotNullOrEmpty(members, nameof(members));
+            if (Store.Exists(topic))
+            {
+                throw new Exception("Thread with topic already exists");
+            }
             var chatThreadClient = await Client.CreateChatThreadAsync(topic, members);
-            ChatService chatService = new ChatService(chatThreadClient);
-            var clientThread = Client.GetChatThread(chatThreadClient.Id);
-            Store.Add(topic, new Thread(clientThread));
-            return chatService;
+            Thread thread = new Thread(chatThreadClient.Id, topic);
+            Store.Add(thread);
+            return thread;
         }
         #endregion Create Chat Thread
 
@@ -47,8 +50,17 @@ namespace ChatModule.Services
         public async Task<Azure.Response> DeleteChatThreadAsync(string idOrTopic)
         {
             Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            return await Client.DeleteChatThreadAsync(idOrTopic);
+            if (Store.Exists(idOrTopic))
+            {
+                return await Client.DeleteChatThreadAsync(idOrTopic);
+            }
+            else if (Store.GetByUserKey(idOrTopic, out var id))
+            {
+                return await Client.DeleteChatThreadAsync(id);
+            }
+            throw new Exception(string.Format("Thread with id or topic: {0} does not exist", idOrTopic));
         }
+
         #endregion Delete Chat Thread
 
         #region GetChatThread
@@ -58,13 +70,14 @@ namespace ChatModule.Services
             Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
             if (Store.Exists(idOrTopic))
             {
-                return new Thread(await Client.GetChatThreadAsync(idOrTopic));
+                return Store.Get(idOrTopic);
             }
-            else if (Store.GetByUserKey(idOrTopic, out var id))
+            var result = await Client.GetChatThreadAsync(idOrTopic);
+            if (Utils.IsFailure(result.GetRawResponse()))
             {
-                return new Thread(await Client.GetChatThreadAsync(id));
+                throw new Exception(string.Format("Thread with id or topic: {0} does not exist", idOrTopic));
             }
-            throw new Exception(string.Format("Thread with id or topic: {0} does not exist", idOrTopic));
+            return new Thread(result.Value.Id, result.Value.Topic);
         }
         #endregion Get Chat Thread
 
@@ -72,18 +85,28 @@ namespace ChatModule.Services
         public ChatService GetCommunicationThreadClient(string idOrTopic)
         {
             Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            var chatThreadClient = Client.GetChatThreadClient(idOrTopic);
-            return new ChatService(chatThreadClient);
+            if (Store.Exists(idOrTopic))
+            {
+                return new ChatService(Client.GetChatThreadClient(idOrTopic));
+            }
+            else if (Store.GetByUserKey(idOrTopic, out var id))
+            {
+                return new ChatService(Client.GetChatThreadClient(id));
+            }
+            throw new Exception(string.Format("Could not find a thread with this topic or id {0}", idOrTopic));
         }
         #endregion Get Chat Thread Client
-        public Azure.AsyncPageable<ChatThreadInfo> GetUserThreadsInfo(DateTimeOffset startTime = default) => GetUserThreadsInfoAsync(startTime);
-        public Azure.AsyncPageable<ChatThreadInfo> GetUserThreadsInfoAsync(DateTimeOffset startTime = default)
+        public IEnumerable<ChatThreadInfo> GetUserThreadsInfo(DateTimeOffset startTime = default) => GetUserThreadsInfoAsync(startTime).Result;
+        public async Task<IEnumerable<ChatThreadInfo>> GetUserThreadsInfoAsync(DateTimeOffset startTime = default)
         {
-            return Client.GetChatThreadsInfoAsync(startTime);
+            return await Utils.AsyncToList(Client.GetChatThreadsInfoAsync(startTime));
         }
 
         // TODO Access Store to see if we can use the idtoken from there
         private ChatThreadMember IdentityToChatThreadMember(string idToken)
-            => new ChatThreadMember(new Azure.Communication.CommunicationUser(idToken));
+        {
+
+            return new ChatThreadMember(new Azure.Communication.CommunicationUser(idToken));
+        }
     }
 }

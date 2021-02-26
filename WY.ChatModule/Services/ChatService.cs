@@ -111,6 +111,7 @@ namespace ChatModule.Services
             return await Client.UpdateThreadAsync(topic);
         }
 
+        // TODO: implement actual conversion
         private static ChatThreadMember UserToChatThreadMember(User user)
             => new ChatThreadMember(user.CommunicationUser);
     }

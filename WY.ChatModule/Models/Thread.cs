@@ -1,4 +1,5 @@
-﻿using Azure.Communication.Chat;
+﻿using System.Collections.Generic;
+using Azure.Communication.Chat;
 
 namespace ChatModule.Models
 {
@@ -8,12 +9,15 @@ namespace ChatModule.Models
         public string UserKey => Topic;
         public string Id { get; private set; }
         public string Topic { get; private set; }
-        public ChatThread ChatThread { get; private set; }
-        public Thread(ChatThread thread)
+        public IEnumerable<User> Members { get; } // TODO: Maybe remove
+        public IEnumerable<ChatMessage> Messages { get; } // TODO: Maybe remove
+
+        public Thread(string id, string topic, IEnumerable<User> members = null, IEnumerable<ChatMessage> messages = null)
         {
-            ChatThread = thread;
-            Id = thread.Id;
-            Topic = thread.Topic;
+            Id = id;
+            Topic = topic;
+            Members = members ?? new List<User>();
+            Messages = messages ?? new List<ChatMessage>();
         }
     }
 }

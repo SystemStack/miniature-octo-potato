@@ -27,19 +27,16 @@ namespace ChatModule.Services
         public User CreateUser(string userId) => CreateUserAsync(userId).Result;
         public async Task<User> CreateUserAsync(string userId)
         {
-            User user = new User(userId);
-            if (!Store.Add(userId, user))
+            if (Store.Exists(userId))
             {
                 throw new Exception("User ID Already exists");
             }
-            var u = await Client.IssueTokenAsync(await Client.CreateUserAsync(), Scope);
-            User updatedUser = new User(userId, u);
-            if (!Store.Update(userId, user, updatedUser))
+            User user = new User(userId, await Client.IssueTokenAsync(await Client.CreateUserAsync(), Scope));
+            if (!Store.Add(user))
             {
-                Store.Remove(userId, out _);
-                throw new Exception("Unable to issue access token to user");
+                throw new Exception("Unable to create user");
             }
-            return updatedUser;
+            return user;
         }
 
         public Azure.Response DeleteUser(string userId) => DeleteUserAsync(userId).Result;
