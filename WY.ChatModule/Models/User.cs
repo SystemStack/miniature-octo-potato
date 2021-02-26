@@ -1,7 +1,7 @@
 ﻿using Azure.Communication;
 using Azure.Communication.Administration.Models;
 using Azure.Communication.Chat;
-using System;
+using System.Text.Json.Serialization;
 
 namespace ChatModule.Models
 {
@@ -9,14 +9,15 @@ namespace ChatModule.Models
     {
         public string UserId { get; set; }
         public string Id => CommunicationUser.Id;
-        public string Token => CommunicationUserToken.Token;
-        public DateTimeOffset? ShareHistoryTime => ChatThreadMember.ShareHistoryTime;
-        public string InternalKey => Id;
-        public string UserKey => UserId;
         
-        public CommunicationUser CommunicationUser { get; private set; }
-        private CommunicationUserToken CommunicationUserToken { get; set; }
-        private ChatThreadMember ChatThreadMember { get; set; }
+        [JsonIgnore]
+        public string InternalKey => Id;
+        [JsonIgnore]
+        public string UserKey => UserId;
+
+        internal CommunicationUser CommunicationUser { get; private set; }
+        internal CommunicationUserToken CommunicationUserToken { get; private set; }
+        internal ChatThreadMember ChatThreadMember { get; private set; }
         public User(string userId, CommunicationUser communicationUser)
         {
             UserId = userId;

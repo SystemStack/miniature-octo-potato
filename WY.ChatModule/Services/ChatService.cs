@@ -29,7 +29,7 @@ namespace ChatModule.Services
             Utils.IsNotNullOrEmpty(chatMembers, nameof(chatMembers));
             return await Client.AddMembersAsync(chatMembers);
         }
-        
+
         public IEnumerable<ChatThreadMember> GetMembers() => GetMembersAsync().Result;
         public async Task<IEnumerable<ChatThreadMember>> GetMembersAsync()
         {

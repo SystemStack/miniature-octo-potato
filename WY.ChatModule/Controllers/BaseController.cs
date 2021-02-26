@@ -3,7 +3,6 @@ using System;
 
 namespace ChatModule.Controllers
 {
-
     public class BaseController : Microsoft.AspNetCore.Mvc.ControllerBase
     {
         public UserService Service { get; }

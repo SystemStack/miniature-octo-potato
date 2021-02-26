@@ -15,7 +15,7 @@ namespace ChatModule.Services
             : base(serviceProvider)
         {
             Utils.IsNotNull(user, nameof(user));
-            CommunicationUserCredential communicationUserCredential = new CommunicationUserCredential(user.Token);
+            CommunicationUserCredential communicationUserCredential = new CommunicationUserCredential(user.CommunicationUserToken.Token);
             Client = new ChatClient(AccessTokens.UriEndpoint, communicationUserCredential);
         }
 

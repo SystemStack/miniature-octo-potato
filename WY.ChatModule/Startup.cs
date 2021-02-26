@@ -1,11 +1,10 @@
-﻿using ChatModule.Controllers;
-using ChatModule.Models;
+﻿using ChatModule.Models;
 using ChatModule.Services;
 using ChatModule.Stores;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace ChatModule
 {
@@ -13,31 +12,42 @@ namespace ChatModule
     {
         // TODO: Finish configuring
         // TODO: JSON Formatters
-        public void Configure(IApplicationBuilder app)
+        public IConfiguration Configuration { get; }
+        public Startup(IConfiguration configuration)
         {
             Utils.IsNotNull(AccessTokens.ConnectionString, "Connection String");
             Utils.IsNotNull(AccessTokens.ChatKey, "Chat Key");
             Utils.IsNotNull(AccessTokens.Endpoint, "Endpoint");
             Utils.IsNotNull(AccessTokens.UriEndpoint, "URI Endpoint");
-            Host.CreateDefaultBuilder()
-                .ConfigureServices((hostContext, services) => {
-                    // Threadsafe Concurrency Dictionaries for r/w
-                    services
-                        .AddSingleton(new Store<User>())
-                        .AddSingleton(new Store<Thread>());
-                    
-                    // Azure Communication clients instantiated within Services
-                    services.AddScoped(typeof(UserService));
-                    services.AddApiVersioning(apiOptions => {
-                        apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
-                        apiOptions.AssumeDefaultVersionWhenUnspecified = true;
-                        apiOptions.ReportApiVersions = true;
-                    });
+            Configuration = configuration;
+        }
 
-                    services.AddControllers(controllerOptions => {
-                        controllerOptions.AllowEmptyInputInBodyModelBinding = true;
-                    });
-                });
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers().AddJsonOptions(options => {
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+            });
+
+            services.AddSingleton(new Store<User>())
+                    .AddSingleton(new Store<Thread>());
+
+            // Azure Communication clients instantiated within Services
+            services.AddScoped(typeof(UserService));
+            services.AddApiVersioning(apiOptions => {
+                apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
+                apiOptions.AssumeDefaultVersionWhenUnspecified = true;
+                apiOptions.ReportApiVersions = true;
+            });
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseRouting();
+            app.UseEndpoints(endpoints => {
+                endpoints.MapDefaultControllerRoute();
+                endpoints.MapControllers();
+
+            });
         }
     }
 }

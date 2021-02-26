@@ -8,15 +8,15 @@ namespace ChatModule.Controllers
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public sealed class UserController : BaseController<UserService>
     {
         public UserController(IServiceProvider serviceProvider)
             : base(serviceProvider) { }
 
-        [HttpPost]
+        [HttpPost("Create/{userId}")]
         [ApiVersion("1.0")]
-        public async Task<ActionResult<User>> Create(string? userId)
+        public async Task<ActionResult<User>> Create([FromRoute] string userId)
         {
             userId ??= Guid.NewGuid().ToString();
             return await Service.CreateUserAsync(userId);

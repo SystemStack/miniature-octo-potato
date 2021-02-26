@@ -15,7 +15,27 @@ namespace ChatModule.Services
         public UserService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
-            Client = new CommunicationIdentityClient(AccessTokens.Endpoint);
+            try
+            {
+                Client = new CommunicationIdentityClient(AccessTokens.ConnectionString);
+            } catch(Exception e)
+            {
+                if(AccessTokens.SecondaryConnectionString != null)
+                {
+                    try
+                    {
+                        Client = new CommunicationIdentityClient(AccessTokens.SecondaryConnectionString);
+                    }
+                    catch (Exception eInner)
+                    {
+                        throw eInner;
+                    }
+                }
+                else
+                {
+                    throw e;
+                }
+            }
         }
 
         public UserService(IServiceProvider serviceProvider, IEnumerable<CommunicationTokenScope> scopes)
