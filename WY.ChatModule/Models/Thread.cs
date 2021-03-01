@@ -9,8 +9,8 @@ namespace ChatModule.Models
         public string UserKey => Topic;
         public string Id { get; private set; }
         public string Topic { get; private set; }
-        public IEnumerable<User> Members { get; } // TODO: Maybe remove
-        public IEnumerable<ChatMessage> Messages { get; } // TODO: Maybe remove
+        public IEnumerable<User> Members { get; }
+        public IEnumerable<ChatMessage> Messages { get; }
 
         public Thread(string id, string topic, IEnumerable<User> members = null, IEnumerable<ChatMessage> messages = null)
         {

@@ -10,8 +10,6 @@ namespace ChatModule
 {
     public sealed class Startup
     {
-        // TODO: Finish configuring
-        // TODO: JSON Formatters
         public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
@@ -26,18 +24,20 @@ namespace ChatModule
         {
             services.AddControllers().AddJsonOptions(options => {
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+
             });
 
             services.AddSingleton(new Store<User>())
                     .AddSingleton(new Store<Thread>());
 
             // Azure Communication clients instantiated within Services
-            services.AddScoped(typeof(UserService));
-            services.AddApiVersioning(apiOptions => {
-                apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
-                apiOptions.AssumeDefaultVersionWhenUnspecified = true;
-                apiOptions.ReportApiVersions = true;
-            });
+            services.AddScoped(typeof(UserService))
+                    .AddScoped(typeof(ThreadService));
+            //services.AddApiVersioning(apiOptions => {
+            //    apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
+            //    apiOptions.AssumeDefaultVersionWhenUnspecified = true;
+            //    apiOptions.ReportApiVersions = false;
+            //});
         }
 
         public void Configure(IApplicationBuilder app)
@@ -46,7 +46,6 @@ namespace ChatModule
             app.UseEndpoints(endpoints => {
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllers();
-
             });
         }
     }

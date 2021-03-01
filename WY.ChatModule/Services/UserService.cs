@@ -2,40 +2,28 @@
 using ChatModule.Models;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("ChatModule.Test")]
 namespace ChatModule.Services
 {
     public sealed class UserService : BaseService<User, CommunicationIdentityClient>
     {
         private readonly List<CommunicationTokenScope> Scope =
             new List<CommunicationTokenScope>() { CommunicationTokenScope.Chat };
+        private static readonly string ChatBotName = "Weyer Bot - 🤖"; // TODO Move to ChatBot namespace
+        public static User ChatBotUser { get; set; }        
         public UserService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
             try
             {
                 Client = new CommunicationIdentityClient(AccessTokens.ConnectionString);
-            } catch(Exception e)
-            {
-                if(AccessTokens.SecondaryConnectionString != null)
-                {
-                    try
-                    {
-                        Client = new CommunicationIdentityClient(AccessTokens.SecondaryConnectionString);
-                    }
-                    catch (Exception eInner)
-                    {
-                        throw eInner;
-                    }
-                }
-                else
-                {
-                    throw e;
-                }
             }
+            catch
+            {
+                Client = new CommunicationIdentityClient(AccessTokens.SecondaryConnectionString);
+            }
+            CreateChatBotUser();
         }
 
         public UserService(IServiceProvider serviceProvider, IEnumerable<CommunicationTokenScope> scopes)
@@ -44,6 +32,25 @@ namespace ChatModule.Services
             Scope.AddRange(scopes);
         }
 
+        public User GetUser(string userId) => Store.Get(userId);
+        
+        
+        private void CreateChatBotUser()
+        {
+            if (Store.Exists(ChatBotName))
+            {
+                ChatBotUser = Store.Get(ChatBotName);
+            } else
+            {
+                var createResponse = Client.IssueToken(Client.CreateUser(), Scope);
+                if (Utils.IsFailure(createResponse))
+                {
+                    throw new Exception("Failed to create super admin account");
+                }
+                ChatBotUser = new User(ChatBotName, createResponse.Value);
+                Store.Add(ChatBotUser);
+            }
+        }
         public User CreateUser(string userId) => CreateUserAsync(userId).Result;
         public async Task<User> CreateUserAsync(string userId)
         {
@@ -51,38 +58,46 @@ namespace ChatModule.Services
             {
                 throw new Exception("User ID Already exists");
             }
-            User user = new User(userId, await Client.IssueTokenAsync(await Client.CreateUserAsync(), Scope));
-            if (!Store.Add(user))
+            var createResponse = await Client.IssueTokenAsync(await Client.CreateUserAsync(), Scope);
+            if (Utils.IsFailure(createResponse))
             {
-                throw new Exception("Unable to create user");
+                throw new Exception("Was not able to create user");
             }
+            User user = new User(userId, createResponse.Value);
+            Store.Add(user);
             return user;
         }
 
-        public Azure.Response DeleteUser(string userId) => DeleteUserAsync(userId).Result;
-        public async Task<Azure.Response> DeleteUserAsync(string userId)
+        public User DeleteUser(string userId) => DeleteUserAsync(userId).Result;
+        public async Task<User> DeleteUserAsync(string userId)
         {
             var user = Store.Get(userId);
             var response = await Client.DeleteUserAsync(user.CommunicationUser);
-            if (Utils.IsSuccess(response) && Store.Remove(userId, out _))
+            if (Utils.IsFailure(response))
             {
-                return response;
+                throw new Exception("Was not able to delete user");
             }
-            throw new Exception("User not Deleted");
+            Store.Remove(userId, out var deletedUser);
+            return deletedUser;
         }
 
         public User RefreshToken(string userId) => RefreshTokenAsync(userId).Result;
         public async Task<User> RefreshTokenAsync(string userId)
         {
             var user = Store.Get(userId);
-            var azureResponse = await Client.IssueTokenAsync(user.CommunicationUser, Scope);
-            User updatedUser = new User(userId, azureResponse);
-            Store.Update(userId, user, updatedUser);
-            return user;
+            var response = await Client.IssueTokenAsync(user.CommunicationUser, Scope);
+            if (Utils.IsFailure(response))
+            {
+                throw new Exception("Access tokens not issued");
+            }
+            User updatedUser = new User(userId, response);
+            Store.Update(userId, updatedUser);
+            return updatedUser;
         }
 
-        public Azure.Response RevokeAccessToken(string userId) => RevokeAccessTokenAsync(userId).Result;
-        public async Task<Azure.Response> RevokeAccessTokenAsync(string userId)
+        public User RevokeAccessToken(string userId)
+            => RevokeAccessTokenAsync(userId).Result;
+        public async Task<User> RevokeAccessTokenAsync(string userId)
         {
             var user = Store.Get(userId);
             var response = await Client.RevokeTokensAsync(user.CommunicationUser);
@@ -90,7 +105,7 @@ namespace ChatModule.Services
             {
                 throw new Exception("Access tokens not revoked");
             }
-            return response;
+            return user;
         }
     }
 }

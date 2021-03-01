@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ChatModule.Stores
 {
@@ -13,10 +14,17 @@ namespace ChatModule.Stores
         //internalKey: data model
         private readonly ConcurrentDictionary<string, T> Data;
 
+        public class KeyComparer : IEqualityComparer<string>
+        {
+            bool IEqualityComparer<string>.Equals(string x, string y)
+                => x.Trim().ToLowerInvariant() == y.Trim().ToLowerInvariant();
+            int IEqualityComparer<string>.GetHashCode(string obj)
+                => obj.GetHashCode();
+        }
         public Store()
         {
-            Keys = new ConcurrentDictionary<string, string>(Environment.ProcessorCount * 2, 100);
-            Data = new ConcurrentDictionary<string, T>(Environment.ProcessorCount * 2, 100);
+            Keys = new ConcurrentDictionary<string, string>(Environment.ProcessorCount * 2, 100, new KeyComparer());
+            Data = new ConcurrentDictionary<string, T>(Environment.ProcessorCount * 2, 100, new KeyComparer());
         }
 
         public bool Exists(string key)
@@ -31,17 +39,12 @@ namespace ChatModule.Stores
             if (Data.TryGetValue(key, out var Result))
             {
                 return Result;
-            } else if (Keys.TryGetValue(key, out var internalKey)) 
+            }
+            else if (Keys.TryGetValue(key, out var internalKey))
             {
                 return Get(internalKey);
             }
             throw new KeyNotFoundException(string.Format("No {0} with key: {1} found", typeof(T), key));
-        }
-
-        public bool GetByUserKey(string userKey, out string internalKey)
-        {
-            Utils.IsNotNull(userKey, nameof(userKey));
-            return Keys.TryGetValue(userKey, out internalKey);
         }
 
         public bool Add(T element)
@@ -53,14 +56,25 @@ namespace ChatModule.Stores
             }
             return false;
         }
-        public bool Update(string key, T newValue, T oldValue)
+        public bool Update(string key, T newValue, T oldValue = default)
         {
             Utils.IsNotNull(key, nameof(key));
             Utils.IsNotNullModel(newValue, nameof(newValue));
-            Utils.IsNotNullModel(oldValue, nameof(oldValue));
+            if (oldValue.Equals(default(T)))
+            {
+                Data.TryGetValue(key, out oldValue);
+            }
             return Data.TryUpdate(key, newValue, oldValue);
         }
-        
+
+        public bool Update(string key, T newValue)
+        {
+            Utils.IsNotNull(key, nameof(key));
+            Utils.IsNotNullModel(newValue, nameof(newValue));
+            Data.TryRemove(key, out _);
+            return Data.TryAdd(key, newValue);
+        }
+
         public bool Remove(string key, out T RemovedElement)
         {
             Utils.IsNotNull(key, nameof(key));
@@ -68,7 +82,8 @@ namespace ChatModule.Stores
             {
                 Data.TryRemove(key, out RemovedElement);
                 return Keys.TryRemove(RemovedElement.UserKey, out _);
-            } else if (Keys.ContainsKey(key))
+            }
+            else if (Keys.ContainsKey(key))
             {
                 Keys.TryRemove(key, out var RemovedInternalKey);
                 return Data.TryRemove(RemovedInternalKey, out RemovedElement);
@@ -79,9 +94,9 @@ namespace ChatModule.Stores
         public int Populate(IEnumerable<T> elements)
         {
             var count = 0;
-            foreach(var e in elements)
+            foreach (var e in elements)
             {
-                if(Add(e))
+                if (Add(e))
                 {
                     count++;
                 }

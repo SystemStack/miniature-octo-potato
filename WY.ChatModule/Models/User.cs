@@ -9,19 +9,27 @@ namespace ChatModule.Models
     {
         public string UserId { get; set; }
         public string Id => CommunicationUser.Id;
-        
-        [JsonIgnore]
-        public string InternalKey => Id;
-        [JsonIgnore]
-        public string UserKey => UserId;
 
-        internal CommunicationUser CommunicationUser { get; private set; }
-        internal CommunicationUserToken CommunicationUserToken { get; private set; }
-        internal ChatThreadMember ChatThreadMember { get; private set; }
+        // [JsonIgnore]
+        public string InternalKey => Id;
+        // [JsonIgnore]
+        public string UserKey => UserId;
+        // internal 
+        public CommunicationUser CommunicationUser { get; private set; }
+        // internal 
+        public CommunicationUserToken CommunicationUserToken { get; private set; }
+        // internal 
+        public ChatThreadMember ChatThreadMember { get; private set; }
+        public User() { }
         public User(string userId, CommunicationUser communicationUser)
         {
             UserId = userId;
             CommunicationUser = communicationUser;
+            ChatThreadMember = new ChatThreadMember(CommunicationUser) {
+                DisplayName = UserId,
+                ShareHistoryTime = new System.DateTimeOffset(),
+                User = communicationUser
+            };
         }
         public User(string userId, CommunicationUserToken token)
             : this(userId, token.User)
@@ -29,10 +37,12 @@ namespace ChatModule.Models
             CommunicationUserToken = token;
         }
 
-        public User(string userId, ChatThreadMember member)
-            : this(userId, member.User)
+        public override bool Equals(object obj)
         {
-            ChatThreadMember = member;
+            var e = obj as User;
+            return e != null && GetHashCode() == e.GetHashCode();
         }
+        public override int GetHashCode()
+            => InternalKey.GetHashCode() ^ UserKey.GetHashCode();
     }
 }

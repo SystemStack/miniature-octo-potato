@@ -31,7 +31,8 @@ namespace ChatModule
             }
         }
 
-        public static bool IsNotNullOrEmpty<T>(IEnumerable<T> arg, string argName){
+        public static bool IsNotNullOrEmpty<T>(IEnumerable<T> arg, string argName)
+        {
             if (arg == null)
             {
                 throw new ArgumentNullException(argName, $"{argName} cannot be null");
@@ -42,11 +43,13 @@ namespace ChatModule
             }
             throw new ArgumentNullException(argName, $"{argName} cannot be empty");
         }
-
+        public static bool IsFailure<T>(Azure.Response<T> response)
+            => IsFailure(response.GetRawResponse());
         public static bool IsFailure(Azure.Response response)
             => !IsSuccess(response);
-
-        public static bool IsSuccess(Azure.Response response) 
+        public static bool IsSuccess<T>(Azure.Response<T> response)
+            => IsSuccess(response.GetRawResponse());
+        public static bool IsSuccess(Azure.Response response)
             => response.Status >= 200 && response.Status <= 299;
 
         public async static Task<IEnumerable<T>> AsyncToList<T>(IAsyncEnumerable<T> e)

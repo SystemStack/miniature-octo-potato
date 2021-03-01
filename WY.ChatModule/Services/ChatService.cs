@@ -3,39 +3,63 @@ using Azure.Communication.Chat;
 using ChatModule.Models;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("ChatModule.Test")]
 namespace ChatModule.Services
 {
-    public sealed class ChatService
+    public sealed class ChatService: BaseService<User, ChatThreadClient>
     {
-        private ChatThreadClient Client { get; }
-        public ChatService(ChatThreadClient chatThreadClient)
+        public ChatService(IServiceProvider serviceProvider, ChatThreadClient chatThreadClient)
+            : base(serviceProvider)
         {
             Utils.IsNotNull(chatThreadClient, nameof(chatThreadClient));
             Client = chatThreadClient;
         }
 
-        #region Members
-        public Azure.Response AddMembers(List<User> chatMembers)
-            => AddMembersAsync(chatMembers.ConvertAll(new Converter<User, ChatThreadMember>(UserToChatThreadMember))).Result;
+        #region Add Thread Members
+        public Azure.Response AddMembers(List<string> chatMembers) => AddMembersAsync(chatMembers).Result;
+        public async Task<Azure.Response> AddMembersAsync(List<string> chatMembers)
+            => await AddMembersAsync(chatMembers.ConvertAll(new Converter<string, User>(StringToUser)));
+        public Azure.Response AddMembers(List<User> chatMembers) => AddMembersAsync(chatMembers).Result;
         public async Task<Azure.Response> AddMembersAsync(List<User> chatMembers)
             => await AddMembersAsync(chatMembers.ConvertAll(new Converter<User, ChatThreadMember>(UserToChatThreadMember)));
         public Azure.Response AddMembers(IEnumerable<ChatThreadMember> chatMembers) => AddMembersAsync(chatMembers).Result;
         public async Task<Azure.Response> AddMembersAsync(IEnumerable<ChatThreadMember> chatMembers)
         {
-            Utils.IsNotNullOrEmpty(chatMembers, nameof(chatMembers));
             return await Client.AddMembersAsync(chatMembers);
         }
+        #endregion Add Thread Members
 
+        #region Get Thread Members
         public IEnumerable<ChatThreadMember> GetMembers() => GetMembersAsync().Result;
         public async Task<IEnumerable<ChatThreadMember>> GetMembersAsync()
         {
             return await Utils.AsyncToList(Client.GetMembersAsync());
         }
+        #endregion Get Thread Members
 
+        #region Remove Thread Members
+        public async Task<int> RemoveMembersAsync(List<string> members)
+        {
+            var tasks = new List<Task>();
+            var removedMembers = 0;
+            foreach (var member in members)
+            {
+                tasks.Add(Task.Run(async () => {
+                    if (Utils.IsSuccess(await RemoveMemberAsync(member))) {
+                        Interlocked.Increment(ref removedMembers);
+                    }
+                }));
+            }
+            await Task.WhenAll(tasks);
+            return removedMembers;
+        }
+
+        public Azure.Response RemoveMember(string id)
+            => RemoveMemberAsync(Store.Get(id).CommunicationUser).Result;
+        public async Task<Azure.Response> RemoveMemberAsync(string id)
+            => await RemoveMemberAsync(Store.Get(id).CommunicationUser);
         public Azure.Response RemoveMember(User user)
            => RemoveMemberAsync(user.CommunicationUser).Result;
         public async Task<Azure.Response> RemoveMemberAsync(User user)
@@ -44,41 +68,21 @@ namespace ChatModule.Services
             => RemoveMemberAsync(user).Result;
         public async Task<Azure.Response> RemoveMemberAsync(CommunicationUser user)
         {
-            Utils.IsNotNull(user, nameof(user));
             return await Client.RemoveMemberAsync(user);
         }
-        #endregion Members
+        #endregion Remove Thread Members
 
         #region Messages
-        public SendChatMessageResult SendMessage(string content, string? displayName = null) => SendMessageAsync(content, displayName).Result;
-        public async Task<SendChatMessageResult> SendMessageAsync(string content, string? displayname = null)
+        public SendChatMessageResult SendMessage(string content, string displayName) => SendMessageAsync(content, displayName).Result;
+        public async Task<SendChatMessageResult> SendMessageAsync(string content, string displayname, ChatMessagePriority priorty = default)
         {
-            Utils.IsNotNull(content, nameof(content));
-            return await Client.SendMessageAsync(content, ChatMessagePriority.Normal, displayname);
-        }
-
-        public Azure.Response SendReadReceipt(string messageId) => SendReadReceiptAsync(messageId).Result;
-        public async Task<Azure.Response> SendReadReceiptAsync(string messageId)
-        {
-            Utils.IsNotNull(messageId, nameof(messageId));
-            return await Client.SendReadReceiptAsync(messageId);
-        }
-
-        public Azure.Response SendTypingNotification() => SendTypingNotificationAsync().Result;
-        public async Task<Azure.Response> SendTypingNotificationAsync()
-        {
-            return await Client.SendTypingNotificationAsync();
+            return await Client.SendMessageAsync(content, priorty, displayname);
         }
 
         public IEnumerable<ChatMessage> GetMessages() => GetMessagesAsync().Result;
         public async Task<IEnumerable<ChatMessage>> GetMessagesAsync()
         {
             return await Utils.AsyncToList(Client.GetMessagesAsync());
-        }
-        public IEnumerable<ReadReceipt> GetReadReceipts() => GetReadReceiptsAsync().Result;
-        public async Task<IEnumerable<ReadReceipt>> GetReadReceiptsAsync()
-        {
-            return await Utils.AsyncToList(Client.GetReadReceiptsAsync());
         }
 
         public Azure.Response UpdateMessage(string messageId, string content) => UpdateMessageAsync(messageId, content).Result;
@@ -87,6 +91,12 @@ namespace ChatModule.Services
             Utils.IsNotNull(messageId, nameof(messageId));
             Utils.IsNotNull(content, nameof(content));
             return await Client.UpdateMessageAsync(messageId, content);
+        }
+        public Azure.Response UpdateThread(string topic) => UpdateThreadAsync(topic).Result;
+        public async Task<Azure.Response> UpdateThreadAsync(string topic)
+        {
+            Utils.IsNotNull(topic, nameof(topic));
+            return await Client.UpdateThreadAsync(topic);
         }
 
         public Azure.Response DeleteMessage(string messageId) => DeleteMessageAsync(messageId).Result;
@@ -101,18 +111,32 @@ namespace ChatModule.Services
             Utils.IsNotNull(id, nameof(id));
             return await Client.GetMessageAsync(id);
         }
-        #endregion Messages
+        #endregion
 
-
-        public Azure.Response UpdateThread(string topic) => UpdateThreadAsync(topic).Result;
-        public async Task<Azure.Response> UpdateThreadAsync(string topic)
+        #region Read Receipts & IsTyping
+        public Azure.Response SendTypingNotification() => SendTypingNotificationAsync().Result;
+        public async Task<Azure.Response> SendTypingNotificationAsync()
         {
-            Utils.IsNotNull(topic, nameof(topic));
-            return await Client.UpdateThreadAsync(topic);
+            return await Client.SendTypingNotificationAsync();
         }
 
-        // TODO: implement actual conversion
+        public Azure.Response SendReadReceipt(string messageId) => SendReadReceiptAsync(messageId).Result;
+        public async Task<Azure.Response> SendReadReceiptAsync(string messageId)
+        {
+            return await Client.SendReadReceiptAsync(messageId);
+        }
+        public IEnumerable<ReadReceipt> GetReadReceipts() => GetReadReceiptsAsync().Result;
+        public async Task<IEnumerable<ReadReceipt>> GetReadReceiptsAsync()
+        {
+            return await Utils.AsyncToList(Client.GetReadReceiptsAsync());
+        }
+        #endregion Read Receipts
+
+
         private static ChatThreadMember UserToChatThreadMember(User user)
-            => new ChatThreadMember(user.CommunicationUser);
+            => user.ChatThreadMember;
+
+        private User StringToUser(string userId)
+            => Store.Get(userId);
     }
 }
