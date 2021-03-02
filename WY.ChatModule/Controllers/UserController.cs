@@ -8,12 +8,13 @@ namespace ChatModule.Controllers
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]s")]
     public sealed class UserController : BaseController<UserService>
     {
         public UserController(IServiceProvider serviceProvider)
             : base(serviceProvider) { }
 
+        #region User CRUD
         [HttpGet("{userId}")]
         public ActionResult<User> Get(string userId) => Service.GetUser(userId);
 
@@ -24,25 +25,29 @@ namespace ChatModule.Controllers
             return await Service.CreateUserAsync(userId);
         }
 
-        [HttpPost("{userId}")]
+        [HttpDelete("{userId}")]
+        public async Task<ActionResult<User>> Delete(string userId)
+        {
+            Utils.IsNotNull(userId, nameof(userId));
+            return await Service.DeleteUserAsync(userId);
+        }
+        #endregion User CRUD
+
+        #region User Actions
+        [HttpGet("{userId}/Refresh")]
         public async Task<ActionResult<User>> RefreshToken(string userId)
         {
             Utils.IsNotNull(userId, nameof(userId));
             return await Service.RefreshTokenAsync(userId);
         }
 
-        [HttpPost("{userId}")]
+        [HttpGet("{userId}/Revoke")]
         public async Task<ActionResult<User>> RevokeToken(string userId)
         {
             Utils.IsNotNull(userId, nameof(userId));
             return await Service.RevokeAccessTokenAsync(userId);
         }
+        #endregion User Actions
 
-        [HttpPost("{userId}")]
-        public async Task<ActionResult<User>> Delete(string userId)
-        {
-            Utils.IsNotNull(userId, nameof(userId));
-            return await Service.DeleteUserAsync(userId);
-        }
     }
 }

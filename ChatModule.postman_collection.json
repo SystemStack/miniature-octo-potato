@@ -28,16 +28,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/User/Create/{{usr1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Users/{{usr1}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"User",
-								"Create",
+								"Users",
 								"{{usr1}}"
 							]
 						}
@@ -64,16 +60,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/User/Create/{{usr1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Users/{{usr1}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"User",
-								"Create",
+								"Users",
 								"{{usr1}}"
 							]
 						}
@@ -100,16 +92,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/User/Create/{{usr2}}",
-							"protocol": "http",
+							"raw": "{{api}}/Users/{{usr2}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"User",
-								"Create",
+								"Users",
 								"{{usr2}}"
 							]
 						}
@@ -136,17 +124,77 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/User/Create/{{usr3}}",
-							"protocol": "http",
+							"raw": "{{api}}/Users/{{usr3}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"User",
-								"Create",
+								"Users",
 								"{{usr3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/Users/{{usr1}}/Revoke",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"Users",
+								"{{usr1}}",
+								"Revoke"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/Users/{{usr1}}/Revoke",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"Users",
+								"{{usr1}}",
+								"Revoke"
 							]
 						}
 					},
@@ -174,16 +222,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/User/Get/{{usr1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Users/{{usr1}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"User",
-								"Get",
+								"Users",
 								"{{usr1}}"
 							]
 						}
@@ -233,16 +277,13 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/Create",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"Create"
+								"Threads",
+								""
 							]
 						}
 					},
@@ -270,16 +311,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/Get/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"Get",
+								"Threads",
 								"{{topic1}}"
 							]
 						}
@@ -329,17 +366,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/AddMembers/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Members",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"AddMembers",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Members"
 							]
 						}
 					},
@@ -365,17 +399,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/GetMembers/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Members",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"GetMembers",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Members"
 							]
 						}
 					},
@@ -429,17 +460,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/SendMessage/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Messages",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"SendMessage",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Messages"
 							]
 						}
 					},
@@ -492,17 +520,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/SendMessage/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Messages",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"SendMessage",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Messages"
 							]
 						}
 					},
@@ -548,16 +573,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/GetMessage/{{topic1}}/{{MessageId}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/{{MessageId}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"GetMessage",
+								"Threads",
 								"{{topic1}}",
 								"{{MessageId}}"
 							]
@@ -584,17 +605,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/GetMessages/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Messages",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"GetMessages",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Messages"
 							]
 						},
 						"description": "\r\n"
@@ -620,17 +638,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/GetReadReceipts/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/ReadReceipts",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"GetReadReceipts",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"ReadReceipts"
 							]
 						},
 						"description": "\r\n"
@@ -672,7 +687,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -684,17 +699,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/UpdateMessage/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Messages",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"UpdateMessage",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Messages"
 							]
 						}
 					},
@@ -722,16 +734,12 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/DeleteMessage/{{topic1}}/{{MessageId2}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/{{MessageId2}}",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"DeleteMessage",
+								"Threads",
 								"{{topic1}}",
 								"{{MessageId2}}"
 							]
@@ -772,7 +780,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -784,19 +792,49 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/Thread/RemoveMembers/{{topic1}}",
-							"protocol": "http",
+							"raw": "{{api}}/Threads/{{topic1}}/Members",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
-								"api",
-								"Thread",
-								"RemoveMembers",
-								"{{topic1}}"
+								"Threads",
+								"{{topic1}}",
+								"Members"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Messages Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/Threads/{{topic1}}/Messages",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"Threads",
+								"{{topic1}}",
+								"Messages"
+							]
+						},
+						"description": "\r\n"
 					},
 					"response": []
 				}

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ChatModule.Services
 {
-    public sealed class ChatService: BaseService<User, ChatThreadClient>
+    public sealed class ChatService : BaseService<User, ChatThreadClient>
     {
         public ChatService(IServiceProvider serviceProvider, ChatThreadClient chatThreadClient)
             : base(serviceProvider)
@@ -47,7 +47,8 @@ namespace ChatModule.Services
             foreach (var member in members)
             {
                 tasks.Add(Task.Run(async () => {
-                    if (Utils.IsSuccess(await RemoveMemberAsync(member))) {
+                    if (Utils.IsSuccess(await RemoveMemberAsync(member)))
+                    {
                         Interlocked.Increment(ref removedMembers);
                     }
                 }));

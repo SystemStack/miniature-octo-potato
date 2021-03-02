@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+// TODO: Entire chatbot!
 namespace ChatModule.ChatBot
 {
     /// <summary>

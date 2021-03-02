@@ -1,6 +1,5 @@
 ﻿using Azure.Communication.Chat;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ChatModule.Models
 {
@@ -28,6 +27,6 @@ namespace ChatModule.Models
         public string Topic { get; set; }
         public string Content { get; set; }
         public ChatMessagePriority Priority { get; set; }
-        public MessageCreationModel() {}
+        public MessageCreationModel() { }
     }
 }

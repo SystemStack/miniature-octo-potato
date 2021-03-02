@@ -10,7 +10,7 @@ namespace ChatModule.Controllers
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]s")]
     public sealed class ThreadController : BaseController<ThreadService>
     {
         public ThreadController(IServiceProvider serviceProvider)
@@ -20,19 +20,19 @@ namespace ChatModule.Controllers
         [HttpPost]
         public async Task<Thread> Create([FromBody] ThreadCreationModel thread)
         {
-            Utils.IsNotNull(thread, nameof(thread));
+            Utils.IsNotNull(thread.Topic, nameof(thread.Topic));
             Utils.IsNotNullOrEmpty(thread.Members, nameof(thread.Members));
             return await Service.CreateChatThreadAsync(thread);
         }
 
-        [HttpGet("{idOrTopic}")]
-        public async Task<Thread> Get(string idOrTopic)
+        [HttpGet("{topic}")]
+        public async Task<Thread> Get(string topic)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            return await Service.GetChatThreadAsync(idOrTopic);
+            Utils.IsNotNull(topic, nameof(topic));
+            return await Service.GetChatThreadAsync(topic);
         }
 
-        [HttpDelete("{idOrTopic}")]
+        [HttpDelete("{topic}")]
         public async Task<bool> Delete(string idOrTopic)
         {
             Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
@@ -45,13 +45,13 @@ namespace ChatModule.Controllers
         }
         #endregion Threads
 
-        #region Thread Memberships
-        [HttpPost("{idOrTopic}")]
-        public async Task<bool> AddMembers(string idOrTopic, [FromBody] ThreadCreationModel model)
+        #region Thread Members
+        [HttpPost("{topic}/Members")]
+        public async Task<bool> AddMembers(string topic, [FromBody] ThreadCreationModel model)
         {
-            Utils.IsNotNull(idOrTopic ?? model.Topic, nameof(model.Topic));
+            Utils.IsNotNull(topic ?? model.Topic, nameof(model.Topic));
             Utils.IsNotNullOrEmpty(model.Members, nameof(model.Members));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic ?? model.Topic);
+            var chatService = Service.GetCommunicationThreadClient(topic ?? model.Topic);
             var result = await chatService.AddMembersAsync(model.Members);
             if (Utils.IsFailure(result))
             {
@@ -60,51 +60,55 @@ namespace ChatModule.Controllers
             return true;
         }
 
-        [HttpGet("{idOrTopic}")]
-        public async Task<IEnumerable<ChatThreadMember>> GetMembers(string idOrTopic)
+        [HttpGet("{topic}/Members")]
+        public async Task<IEnumerable<ChatThreadMember>> GetMembers(string topic)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            Utils.IsNotNull(topic, nameof(topic));
+            var chatService = Service.GetCommunicationThreadClient(topic);
             var result = await chatService.GetMembersAsync();
+            if (!Utils.IsNotNullOrEmpty(result, nameof(result)))
+            {
+                throw new Exception("No members found");
+            }
             return result;
         }
 
-        [HttpPost("{idOrTopic}")]
-        public async Task<int> RemoveMembers(string idOrTopic, [FromBody] ThreadCreationModel model)
+        [HttpDelete("{topic}/Members")]
+        public async Task<int> RemoveMembers(string topic, [FromBody] ThreadCreationModel model)
         {
-            Utils.IsNotNull(idOrTopic ?? model.Topic, nameof(model.Topic));
+            Utils.IsNotNull(topic ?? model.Topic, nameof(model.Topic));
             Utils.IsNotNull(model.Members, nameof(model.Members));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic ?? model.Topic);
+            var chatService = Service.GetCommunicationThreadClient(topic ?? model.Topic);
             return await chatService.RemoveMembersAsync(model.Members);
         }
         #endregion Thread Memberships
 
         #region Thread Messages
-        [HttpPost("{idOrTopic}")]
-        public async Task<SendChatMessageResult> SendMessage(string idOrTopic, [FromBody] MessageCreationModel model)
+        [HttpPost("{topic}/Messages")]
+        public async Task<SendChatMessageResult> SendMessage(string topic, [FromBody] MessageCreationModel model)
         {
-            Utils.IsNotNull(idOrTopic ?? model.Topic, nameof(model.Topic));
+            Utils.IsNotNull(topic ?? model.Topic, nameof(model.Topic));
             Utils.IsNotNull(model.Content, nameof(model.Content));
             Utils.IsNotNull(model.CreatedBy, nameof(model.CreatedBy));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic ?? model.Topic);
+            var chatService = Service.GetCommunicationThreadClient(topic ?? model.Topic);
             return await chatService.SendMessageAsync(model.Content, model.CreatedBy, model.Priority);
         }
 
-        [HttpGet("{idOrTopic}")]
-        public async Task<IEnumerable<ChatMessage>> GetMessages(string idOrTopic)
+        [HttpGet("{topic}/Messages")]
+        public async Task<IEnumerable<ChatMessage>> GetMessages(string topic)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            Utils.IsNotNull(topic, nameof(topic));
+            var chatService = Service.GetCommunicationThreadClient(topic);
             return await chatService.GetMessagesAsync();
         }
 
-        [HttpPost("{idOrTopic}")]
-        public async Task<bool> UpdateMessage(string idOrTopic, [FromBody] MessageCreationModel model)
+        [HttpPut("{topic}/Messages")]
+        public async Task<bool> UpdateMessage(string topic, [FromBody] MessageCreationModel model)
         {
-            Utils.IsNotNull(idOrTopic ?? model.Topic, nameof(idOrTopic));
+            Utils.IsNotNull(topic ?? model.Topic, nameof(topic));
             Utils.IsNotNull(model.Id, nameof(model.Id));
             Utils.IsNotNull(model.Content, nameof(model.Content));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic ?? model.Topic);
+            var chatService = Service.GetCommunicationThreadClient(topic ?? model.Topic);
             var result = await chatService.UpdateMessageAsync(model.Id, model.Content);
             if (Utils.IsFailure(result))
             {
@@ -113,12 +117,12 @@ namespace ChatModule.Controllers
             return true;
         }
 
-        [HttpGet("{idOrTopic}/{messageId}")]
-        public async Task<ChatMessage> GetMessage(string idOrTopic, string messageId)
+        [HttpGet("{topic}/{messageId}")]
+        public async Task<ChatMessage> GetMessage(string topic, string messageId)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
+            Utils.IsNotNull(topic, nameof(topic));
             Utils.IsNotNull(messageId, nameof(messageId));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            var chatService = Service.GetCommunicationThreadClient(topic);
             var result = await chatService.GetMessageAsync(messageId);
             if (Utils.IsFailure(result.GetRawResponse()))
             {
@@ -127,38 +131,38 @@ namespace ChatModule.Controllers
             return result.Value;
         }
 
-        [HttpDelete("{idOrTopic}/{messageId}")]
-        public async Task<bool> DeleteMessage(string idOrTopic, string messageId)
+        [HttpDelete("{topic}/{messageId}")]
+        public async Task<bool> DeleteMessage(string topic, string messageId)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
+            Utils.IsNotNull(topic, nameof(topic));
             Utils.IsNotNull(messageId, nameof(messageId));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            var chatService = Service.GetCommunicationThreadClient(topic);
             var result = await chatService.DeleteMessageAsync(messageId);
 
             if (Utils.IsFailure(result))
             {
-                throw new Exception("Failed to add members to thread");
+                throw new Exception("Failed to delete message from thread");
             }
             return true;
         }
         #endregion Thread Messages
 
         #region Thread Message Features
-        [HttpGet("{idOrTopic}")]
-        public async Task<IEnumerable<ReadReceipt>> GetReadReceipts(string idOrTopic)
+        [HttpGet("{topic}/ReadReceipts")]
+        public async Task<IEnumerable<ReadReceipt>> GetReadReceipts(string topic)
         {
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            Utils.IsNotNull(topic, nameof(topic));
+            var chatService = Service.GetCommunicationThreadClient(topic);
             return await chatService.GetReadReceiptsAsync();
         }
 
-        [HttpPost("{idOrTopic}/{messageId}")]
-        public async Task<bool> SendReadReceipt(string idOrTopic, string messageId)
+        [HttpPost("{topic}/{messageId}/ReadReceipts")]
+        public async Task<bool> SendReadReceipt(string topic, string messageId)
         {
-            throw new NotImplementedException(/*TODO*/);
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
+            throw new NotImplementedException(/*TODO: Read Receipts*/);
+            Utils.IsNotNull(topic, nameof(topic));
             Utils.IsNotNull(messageId, nameof(messageId));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            var chatService = Service.GetCommunicationThreadClient(topic);
             var result = await chatService.SendReadReceiptAsync(messageId);
             if (Utils.IsFailure(result))
             {
@@ -167,12 +171,12 @@ namespace ChatModule.Controllers
             return true;
         }
 
-        [HttpPost("{idOrTopic}")]
-        public async Task<bool> SendTypingNotification(string idOrTopic)
+        [HttpPost("{topic}/Typing")]
+        public async Task<bool> SendTypingNotification(string topic)
         {
-            throw new NotImplementedException(/*TODO*/);
-            Utils.IsNotNull(idOrTopic, nameof(idOrTopic));
-            var chatService = Service.GetCommunicationThreadClient(idOrTopic);
+            throw new NotImplementedException(/*TODO: Read Receipts*/);
+            Utils.IsNotNull(topic, nameof(topic));
+            var chatService = Service.GetCommunicationThreadClient(topic);
             var result = await chatService.SendTypingNotificationAsync();
             if (Utils.IsFailure(result))
             {

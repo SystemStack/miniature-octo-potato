@@ -11,7 +11,7 @@ namespace ChatModule.Services
         public Store<T1> Store { get; set; }
         public T2 Client { get; set; }
     }
-        
+
 
     public class BaseService<T1, T2> : IService<T1, T2>
         where T1 : IModel

@@ -11,7 +11,7 @@ namespace ChatModule.Services
         private readonly List<CommunicationTokenScope> Scope =
             new List<CommunicationTokenScope>() { CommunicationTokenScope.Chat };
         private static readonly string ChatBotName = "Weyer Bot - 🤖"; // TODO Move to ChatBot namespace
-        public static User ChatBotUser { get; set; }        
+        public static User ChatBotUser { get; set; }
         public UserService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
@@ -33,14 +33,15 @@ namespace ChatModule.Services
         }
 
         public User GetUser(string userId) => Store.Get(userId);
-        
-        
+
+
         private void CreateChatBotUser()
         {
             if (Store.Exists(ChatBotName))
             {
                 ChatBotUser = Store.Get(ChatBotName);
-            } else
+            }
+            else
             {
                 var createResponse = Client.IssueToken(Client.CreateUser(), Scope);
                 if (Utils.IsFailure(createResponse))

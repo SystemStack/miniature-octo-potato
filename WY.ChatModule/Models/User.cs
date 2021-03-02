@@ -38,10 +38,8 @@ namespace ChatModule.Models
         }
 
         public override bool Equals(object obj)
-        {
-            var e = obj as User;
-            return e != null && GetHashCode() == e.GetHashCode();
-        }
+             => obj is User e && GetHashCode() == e.GetHashCode();
+
         public override int GetHashCode()
             => InternalKey.GetHashCode() ^ UserKey.GetHashCode();
     }

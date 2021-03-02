@@ -2,7 +2,6 @@
 using ChatModule.Services;
 using ChatModule.Stores;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,10 +28,10 @@ namespace ChatModule
 
             services.AddSingleton(new Store<User>())
                     .AddSingleton(new Store<Thread>());
-
-            // Azure Communication clients instantiated within Services
             services.AddScoped(typeof(UserService))
                     .AddScoped(typeof(ThreadService));
+
+            // TODO: API Versioning
             //services.AddApiVersioning(apiOptions => {
             //    apiOptions.DefaultApiVersion = new ApiVersion(1, 0);
             //    apiOptions.AssumeDefaultVersionWhenUnspecified = true;
